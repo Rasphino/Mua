@@ -3,6 +3,8 @@ package src.mua;
 import java.util.*;
 
 import src.mua.Lexer;
+import src.mua.Parser;
+import src.mua.ASTree;
 
 public class Main {
     private static Scanner in = new Scanner(System.in);
@@ -17,6 +19,9 @@ public class Main {
         while (in.hasNextLine() && !(cmd_in = in.nextLine()).equals("exit")) {
             List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(cmd_in);
             System.out.println(tokens);
+
+            ASTree tree = Parser.parse(tokens);
+            tree.printTree();
 
             // TODO
 
