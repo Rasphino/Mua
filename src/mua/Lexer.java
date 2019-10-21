@@ -55,6 +55,7 @@ public class Lexer {
             } else if (exp_name.contains(now_tok)) {
                 type = TokType.ExpressTok;
             } else if (now_tok.startsWith("\"")) {
+                now_tok = now_tok.substring(1);
                 type = TokType.Word;
             } else {
                 type = TokType.Unknown;
