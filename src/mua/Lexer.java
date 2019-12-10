@@ -22,13 +22,15 @@ public class Lexer {
     ));
 
     public enum TokType {
-        StateTok, ExpressTok, Number, Bool, Word, List, ListElement, Operator_1, Operator_2, Unknown
+        StateTok, ExpressTok, Word, List, ListElement, Operator_1, Operator_2, Unknown
     }
 
     public static ArrayList<AbstractMap.SimpleEntry<String, TokType>> parse(String stmt) {
         ArrayList<String> tmp = new ArrayList<>(Arrays.asList(stmt
                 .replace("(", " ( ")
                 .replace(")", " ) ")
+                .replace("[", " [ ")
+                .replace("]", " ] ")
                 .replace(":", "thing \"")
                 .trim()
                 .split("\\s+")));
@@ -43,9 +45,9 @@ public class Lexer {
         for (int i = 0; i < tmp.size(); i++) {
             String now_tok = tmp.get(i);
             if (now_tok.equals("true") || now_tok.equals("false")) {
-                type = TokType.Bool;
+                type = TokType.Word;
             } else if (isNumeric(now_tok)) {
-                type = TokType.Number;
+                type = TokType.Word;
             } else if (state_name.contains(now_tok)) {
                 type = TokType.StateTok;
             } else if (opr_1_name.contains(now_tok)) {
