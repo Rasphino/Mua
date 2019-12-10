@@ -8,6 +8,8 @@ import src.mua.ASTree;
 import src.mua.Executer;
 
 public class Main {
+    static final boolean DEBUG = true;
+
     public static Scanner in = new Scanner(System.in);
     public static HashMap<String, String> name_space = new HashMap<>();
 
@@ -15,24 +17,30 @@ public class Main {
         String cmd_in;
         int idx;
 
-//        System.out.print(">>> ");
+        if (DEBUG)
+            System.out.print(">>> ");
 
         while (in.hasNextLine() && !(cmd_in = in.nextLine()).equals("exit")) {
             List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(cmd_in);
-//            System.out.println(tokens);
+
+            if (DEBUG)
+                System.out.println("tokens: " + tokens);
 
             ASTree tree = Parser.parse(tokens);
-//            tree.printTree();
-//            System.out.println();
-
+            if (DEBUG) {
+                System.out.println("trees: \n");
+                tree.printTree();
+                System.out.println("----");
+            }
             Executer.execute(tree);
 
-//            System.out.println(name_space);
-//            System.out.println();
-
-//            System.out.print(">>> ");
+            if (DEBUG) {
+                System.out.println(name_space);
+                System.out.print(">>> ");
+            }
         }
-//        System.out.println("Bye");
+        if (DEBUG)
+            System.out.println("Bye");
     }
 
 }
