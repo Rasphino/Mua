@@ -7,13 +7,20 @@ import src.mua.Lexer;
 public class Parser {
     static int i;
 
-    public static ASTree parse(List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens) {
-        ASTree tree = new ASTree();
+    public static List<ASTree> parse(List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens) {
+        List<ASTree> trees = new ArrayList<>();
         i = 0;
-        ASTreeNode node = tree.root;
-        helper(tokens, node);
 
-        return tree;
+        while (i < tokens.size()) {
+            ASTree tree = new ASTree();
+
+            ASTreeNode node = tree.root;
+            helper(tokens, node);
+
+            trees.add(tree);
+        }
+
+        return trees;
     }
 
     private static void helper(List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens, ASTreeNode node) {

@@ -26,13 +26,15 @@ public class Main {
             if (DEBUG)
                 System.out.println("tokens: " + tokens);
 
-            ASTree tree = Parser.parse(tokens);
-            if (DEBUG) {
-                System.out.println("trees: \n");
-                tree.printTree();
-                System.out.println("----");
+            List<ASTree> trees = Parser.parse(tokens);
+            for (ASTree tree : trees) {
+                if (DEBUG) {
+                    System.out.println("trees: ");
+                    tree.printTree();
+                    System.out.println("----");
+                }
+                Executer.execute(tree);
             }
-            Executer.execute(tree);
 
             if (DEBUG) {
                 System.out.println(name_space);
