@@ -22,7 +22,7 @@ public class Lexer {
     ));
 
     public enum TokType {
-        StateTok, ExpressTok, Word, List, ListElement, Operator_1, Operator_2, Unknown
+        StateTok, ExpressTok, Word, Operator_1, Operator_2, ListSep, Unknown
     }
 
     public static ArrayList<AbstractMap.SimpleEntry<String, TokType>> parse(String stmt) {
@@ -59,6 +59,8 @@ public class Lexer {
             } else if (now_tok.startsWith("\"")) {
                 now_tok = now_tok.substring(1);
                 type = TokType.Word;
+            } else if(now_tok.equals("[") || now_tok.equals("]")) {
+                type = TokType.ListSep;
             } else {
                 type = TokType.Unknown;
             }
