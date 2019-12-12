@@ -6,6 +6,7 @@ import src.mua.ASTree;
 import src.mua.ASTreeNode;
 import src.mua.Main;
 import src.mua.Lexer;
+import src.mua.Parser;
 
 public class Executer {
     public static void execute(ASTree tree) {
@@ -35,6 +36,16 @@ public class Executer {
         } else if (opr_name.equals("print")) {
             String value = node.getLeft().getData().getKey();
             System.out.println(value);
+        } else if (opr_name.equals("repeat")) {
+            int time = parseInt(node.getLeft().getData().getKey());
+            String list = node.getRight().getData().getKey();
+            for (int i = 0; i < time; i++) {
+                List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(list);
+                List<src.mua.ASTree> trees = Parser.parse(tokens);
+                for (src.mua.ASTree tree : trees) {
+                    Executer.execute(tree);
+                }
+            }
         } else if (opr_name.equals("thing")) {
             String key = node.getLeft().getData().getKey();
             String value = Main.name_space.get(key);

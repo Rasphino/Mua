@@ -28,13 +28,13 @@ public class Parser {
         AbstractMap.SimpleEntry<String, Lexer.TokType> tok = tokens.get(i++);
         node.setData(tok);
         Lexer.TokType type = tok.getValue();
-        if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make")) ||
+        if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make") && !tok.getKey().equals("repeat")) ||
                 (type == Lexer.TokType.ExpressTok && !tok.getKey().equals("read")) ||
                 type == Lexer.TokType.Operator_1) {
             node.setLeft(new ASTreeNode());
             node = node.getLeft();
             helper(tokens, node);
-        } else if (type == Lexer.TokType.Operator_2 || tok.getKey().equals("make")) {
+        } else if (type == Lexer.TokType.Operator_2 || tok.getKey().equals("make") || tok.getKey().equals("repeat")) {
             node.setLeft(new ASTreeNode());
             node.setRight(new ASTreeNode());
             helper(tokens, node.getLeft());
