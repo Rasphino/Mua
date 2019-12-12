@@ -29,7 +29,7 @@ public class Parser {
         node.setData(tok);
         Lexer.TokType type = tok.getValue();
         if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make") && !tok.getKey().equals("repeat")) ||
-                (type == Lexer.TokType.ExpressTok && !tok.getKey().equals("read")) ||
+                (type == Lexer.TokType.ExpressTok && !tok.getKey().equals("read") && !tok.getKey().equals("readlist")) ||
                 type == Lexer.TokType.Operator_1) {
             node.setLeft(new ASTreeNode());
             node = node.getLeft();
