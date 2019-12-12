@@ -22,7 +22,7 @@ public class Lexer {
     ));
 
     public enum TokType {
-        StateTok, ExpressTok, Word, Operator_1, Operator_2, ListSep, Unknown
+        StateTok, ExpressTok, Word, Operator_1, Operator_2, List, Unknown
     }
 
     public static ArrayList<AbstractMap.SimpleEntry<String, TokType>> parse(String stmt) {
@@ -41,9 +41,12 @@ public class Lexer {
         if ((idx = tmp.indexOf("//")) != -1) tmp.subList(idx, tmp.size()).clear();
 
         ArrayList<AbstractMap.SimpleEntry<String, TokType>> tokens = new ArrayList<>();
-        TokType type;
+        TokType type = TokType.Unknown;
+        int listCnt = 0;
+        String list = "";
         for (int i = 0; i < tmp.size(); i++) {
             String now_tok = tmp.get(i);
+
             if (now_tok.equals("true") || now_tok.equals("false")) {
                 type = TokType.Word;
             } else if (isNumeric(now_tok)) {
@@ -59,12 +62,23 @@ public class Lexer {
             } else if (now_tok.startsWith("\"")) {
                 now_tok = now_tok.substring(1);
                 type = TokType.Word;
-            } else if(now_tok.equals("[") || now_tok.equals("]")) {
-                type = TokType.ListSep;
+            } else if (now_tok.equals("[")) {
+                if (listCnt++ == 0) continue;
+            } else if (now_tok.equals("]")) {
+                if (--listCnt == 0) {
+                    tokens.add(new AbstractMap.SimpleEntry<>(list, TokType.List));
+                    continue;
+                }
             } else {
                 type = TokType.Unknown;
             }
-            tokens.add(new AbstractMap.SimpleEntry<String, TokType>(now_tok, type));
+
+            if (listCnt > 0) {
+                list = list + " " + now_tok;
+                continue;
+            }
+
+            tokens.add(new AbstractMap.SimpleEntry<>(now_tok, type));
         }
         return tokens;
     }

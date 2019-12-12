@@ -54,28 +54,28 @@ public class Executer {
             value = Main.in.nextLine();
             node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(value, Lexer.TokType.Word));
         } else if (opr_name.equals("add")) {
-            double left_val = parseNumber(node.getLeft().getData().getKey());
-            double right_val = parseNumber(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getLeft().getData().getKey());
+            double right_val = parseDouble(node.getRight().getData().getKey());
             String res = Double.toString(left_val + right_val);
             node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("sub")) {
-            double left_val = parseNumber(node.getLeft().getData().getKey());
-            double right_val = parseNumber(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getLeft().getData().getKey());
+            double right_val = parseDouble(node.getRight().getData().getKey());
             String res = Double.toString(left_val - right_val);
             node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("mul")) {
-            double left_val = parseNumber(node.getLeft().getData().getKey());
-            double right_val = parseNumber(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getLeft().getData().getKey());
+            double right_val = parseDouble(node.getRight().getData().getKey());
             String res = Double.toString(left_val * right_val);
             node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("div")) {
-            double left_val = parseNumber(node.getLeft().getData().getKey());
-            double right_val = parseNumber(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getLeft().getData().getKey());
+            double right_val = parseDouble(node.getRight().getData().getKey());
             String res = Double.toString(left_val / right_val);
             node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("mod")) {
-            double left_val = parseNumber(node.getLeft().getData().getKey());
-            double right_val = parseNumber(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getLeft().getData().getKey());
+            double right_val = parseDouble(node.getRight().getData().getKey());
             String res = Double.toString(left_val % right_val);
             node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("eq")) {
@@ -83,8 +83,8 @@ public class Executer {
             String right_str = node.getRight().getData().getKey();
             if ((Lexer.isNumeric(left_str) && isParseableNumber(right_str)) ||
                     (Lexer.isNumeric(right_str) && isParseableNumber(left_str))) {
-                double left_val = parseNumber(left_str);
-                double right_val = parseNumber(right_str);
+                double left_val = parseDouble(left_str);
+                double right_val = parseDouble(right_str);
                 String res = (left_val == right_val) ? "true" : "false";
                 node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
             } else {
@@ -96,8 +96,8 @@ public class Executer {
             String right_str = node.getRight().getData().getKey();
             if ((Lexer.isNumeric(left_str) && isParseableNumber(right_str)) ||
                     (Lexer.isNumeric(right_str) && isParseableNumber(left_str))) {
-                double left_val = parseNumber(left_str);
-                double right_val = parseNumber(right_str);
+                double left_val = parseDouble(left_str);
+                double right_val = parseDouble(right_str);
                 String res = (left_val > right_val) ? "true" : "false";
                 node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
             } else {
@@ -109,8 +109,8 @@ public class Executer {
             String right_str = node.getRight().getData().getKey();
             if ((Lexer.isNumeric(left_str) && isParseableNumber(right_str)) ||
                     (Lexer.isNumeric(right_str) && isParseableNumber(left_str))) {
-                double left_val = parseNumber(left_str);
-                double right_val = parseNumber(right_str);
+                double left_val = parseDouble(left_str);
+                double right_val = parseDouble(right_str);
                 String res = (left_val < right_val) ? "true" : "false";
                 node.setData(new AbstractMap.SimpleEntry<String, Lexer.TokType>(res, Lexer.TokType.Word));
             } else {
@@ -142,7 +142,12 @@ public class Executer {
         }
     }
 
-    private static double parseNumber(String num_str) {
+    private static int parseInt(String num_str) {
+        if (num_str.startsWith("\"")) num_str = num_str.substring(1);
+        return Integer.parseInt(num_str);
+    }
+
+    private static double parseDouble(String num_str) {
         if (num_str.startsWith("\"")) num_str = num_str.substring(1);
         return Double.parseDouble(num_str);
     }
