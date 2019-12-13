@@ -67,6 +67,7 @@ public class Lexer {
             } else if (now_tok.equals("]")) {
                 if (--listCnt == 0) {
                     tokens.add(new AbstractMap.SimpleEntry<>(list, TokType.List));
+                    list = "";
                     continue;
                 }
             } else {

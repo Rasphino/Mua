@@ -11,9 +11,10 @@ public class Main {
     static final boolean DEBUG = true;
 
     public static Scanner in = new Scanner(System.in);
-    public static HashMap<String, String> name_space = new HashMap<>();
+    public static LinkedList<HashMap<String, String>> namespace = new LinkedList<>();
 
     public static void main(String[] args) {
+        namespace.add(new HashMap<>());
         String cmd_in;
         int idx;
 
@@ -26,18 +27,18 @@ public class Main {
             if (DEBUG)
                 System.out.println("tokens: " + tokens);
 
-            List<ASTree> trees = Parser.parse(tokens);
+            List<ASTree> trees = Parser.parse(tokens, namespace);
             for (ASTree tree : trees) {
                 if (DEBUG) {
                     System.out.println("trees: ");
                     tree.printTree();
                     System.out.println("----");
                 }
-                Executer.execute(tree);
+                Executer.execute(tree, namespace);
             }
 
             if (DEBUG) {
-                System.out.println(name_space);
+                System.out.println(namespace);
                 System.out.print(">>> ");
             }
         }
