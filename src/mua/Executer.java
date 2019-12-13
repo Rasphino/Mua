@@ -16,29 +16,25 @@ public class Executer {
     }
 
     private static void helper(ASTreeNode node) {
-        ASTreeNode l = node.getLeft(), r = node.getRight();
-        if (l != null && (l.getData().getValue() == Lexer.TokType.Operator_1 ||
-                l.getData().getValue() == Lexer.TokType.Operator_2 ||
-                l.getData().getValue() == Lexer.TokType.ExpressTok)) {
-            helper(l);
-        }
-        if (r != null && (r.getData().getValue() == Lexer.TokType.Operator_1 ||
-                r.getData().getValue() == Lexer.TokType.Operator_2 ||
-                r.getData().getValue() == Lexer.TokType.ExpressTok)) {
-            helper(r);
+        for (ASTreeNode c : node.childList) {
+            if (c != null && (c.getData().getValue() == Lexer.TokType.Operator_1 ||
+                    c.getData().getValue() == Lexer.TokType.Operator_2 ||
+                    c.getData().getValue() == Lexer.TokType.ExpressTok)) {
+                helper(c);
+            }
         }
 
         String opr_name = node.getData().getKey();
         if (opr_name.equals("make")) {
-            String key = node.getLeft().getData().getKey();
-            String value = node.getRight().getData().getKey();
+            String key = node.getNth(0).getData().getKey();
+            String value = node.getNth(1).getData().getKey();
             Main.name_space.put(key, value);
         } else if (opr_name.equals("print")) {
-            String value = node.getLeft().getData().getKey();
+            String value = node.getNth(0).getData().getKey();
             System.out.println(value);
         } else if (opr_name.equals("repeat")) {
-            int time = parseInt(node.getLeft().getData().getKey());
-            String list = node.getRight().getData().getKey();
+            int time = parseInt(node.getNth(0).getData().getKey());
+            String list = node.getNth(1).getData().getKey();
             for (int i = 0; i < time; i++) {
                 List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(list);
                 List<src.mua.ASTree> trees = Parser.parse(tokens);
@@ -47,15 +43,15 @@ public class Executer {
                 }
             }
         } else if (opr_name.equals("thing")) {
-            String key = node.getLeft().getData().getKey();
+            String key = node.getNth(0).getData().getKey();
             String value = Main.name_space.get(key);
             node.setData(new AbstractMap.SimpleEntry<>(value, Lexer.TokType.Word));
-            node.setLeft(null);
+            node.add(null);
         } else if (opr_name.equals("erase")) {
-            String key = node.getLeft().getData().getKey();
+            String key = node.getNth(0).getData().getKey();
             Main.name_space.remove(key);
         } else if (opr_name.equals("isname")) {
-            String key = node.getLeft().getData().getKey();
+            String key = node.getNth(0).getData().getKey();
             if (Main.name_space.containsKey(key))
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
@@ -69,33 +65,33 @@ public class Executer {
             value = Main.in.nextLine();
             node.setData(new AbstractMap.SimpleEntry<>(value, Lexer.TokType.List));
         } else if (opr_name.equals("add")) {
-            double left_val = parseDouble(node.getLeft().getData().getKey());
-            double right_val = parseDouble(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getNth(0).getData().getKey());
+            double right_val = parseDouble(node.getNth(1).getData().getKey());
             String res = Double.toString(left_val + right_val);
             node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("sub")) {
-            double left_val = parseDouble(node.getLeft().getData().getKey());
-            double right_val = parseDouble(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getNth(0).getData().getKey());
+            double right_val = parseDouble(node.getNth(1).getData().getKey());
             String res = Double.toString(left_val - right_val);
             node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("mul")) {
-            double left_val = parseDouble(node.getLeft().getData().getKey());
-            double right_val = parseDouble(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getNth(0).getData().getKey());
+            double right_val = parseDouble(node.getNth(1).getData().getKey());
             String res = Double.toString(left_val * right_val);
             node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("div")) {
-            double left_val = parseDouble(node.getLeft().getData().getKey());
-            double right_val = parseDouble(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getNth(0).getData().getKey());
+            double right_val = parseDouble(node.getNth(1).getData().getKey());
             String res = Double.toString(left_val / right_val);
             node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("mod")) {
-            double left_val = parseDouble(node.getLeft().getData().getKey());
-            double right_val = parseDouble(node.getRight().getData().getKey());
+            double left_val = parseDouble(node.getNth(0).getData().getKey());
+            double right_val = parseDouble(node.getNth(1).getData().getKey());
             String res = Double.toString(left_val % right_val);
             node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
         } else if (opr_name.equals("eq")) {
-            String left_str = node.getLeft().getData().getKey();
-            String right_str = node.getRight().getData().getKey();
+            String left_str = node.getNth(0).getData().getKey();
+            String right_str = node.getNth(1).getData().getKey();
             if ((Lexer.isNumeric(left_str) && isParseableNumber(right_str)) ||
                     (Lexer.isNumeric(right_str) && isParseableNumber(left_str))) {
                 double left_val = parseDouble(left_str);
@@ -107,8 +103,8 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
             }
         } else if (opr_name.equals("gt")) {
-            String left_str = node.getLeft().getData().getKey();
-            String right_str = node.getRight().getData().getKey();
+            String left_str = node.getNth(0).getData().getKey();
+            String right_str = node.getNth(1).getData().getKey();
             if ((Lexer.isNumeric(left_str) && isParseableNumber(right_str)) ||
                     (Lexer.isNumeric(right_str) && isParseableNumber(left_str))) {
                 double left_val = parseDouble(left_str);
@@ -120,8 +116,8 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
             }
         } else if (opr_name.equals("lt")) {
-            String left_str = node.getLeft().getData().getKey();
-            String right_str = node.getRight().getData().getKey();
+            String left_str = node.getNth(0).getData().getKey();
+            String right_str = node.getNth(1).getData().getKey();
             if ((Lexer.isNumeric(left_str) && isParseableNumber(right_str)) ||
                     (Lexer.isNumeric(right_str) && isParseableNumber(left_str))) {
                 double left_val = parseDouble(left_str);
@@ -133,25 +129,27 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.Word));
             }
         } else if (opr_name.equals("and")) {
-            String left_val = node.getLeft().getData().getKey();
-            String right_val = node.getRight().getData().getKey();
+            String left_val = node.getNth(0).getData().getKey();
+            String right_val = node.getNth(1).getData().getKey();
             if ((left_val.equals("true") || left_val.equals("\"true")) && (right_val.equals("true") || right_val.equals("\"true")))
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
         } else if (opr_name.equals("or")) {
-            String left_val = node.getLeft().getData().getKey();
-            String right_val = node.getRight().getData().getKey();
+            String left_val = node.getNth(0).getData().getKey();
+            String right_val = node.getNth(1).getData().getKey();
             if ((left_val.equals("false") || left_val.equals("\"false")) && (right_val.equals("false") || right_val.equals("\"false")))
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
         } else if (opr_name.equals("not")) {
-            String val = node.getLeft().getData().getKey();
+            String val = node.getNth(0).getData().getKey();
             if (val.equals("true") || val.equals("\"true"))
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
+        } else if (Main.name_space.containsKey(opr_name)) {
+
         } else {
 
         }

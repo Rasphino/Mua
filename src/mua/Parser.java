@@ -31,14 +31,13 @@ public class Parser {
         if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make") && !tok.getKey().equals("repeat")) ||
                 (type == Lexer.TokType.ExpressTok && !tok.getKey().equals("read") && !tok.getKey().equals("readlist")) ||
                 type == Lexer.TokType.Operator_1) {
-            node.setLeft(new ASTreeNode());
-            node = node.getLeft();
-            helper(tokens, node);
+            node.add(new ASTreeNode());
+            helper(tokens, node.getNth(0));
         } else if (type == Lexer.TokType.Operator_2 || tok.getKey().equals("make") || tok.getKey().equals("repeat")) {
-            node.setLeft(new ASTreeNode());
-            node.setRight(new ASTreeNode());
-            helper(tokens, node.getLeft());
-            helper(tokens, node.getRight());
+            node.add(new ASTreeNode());
+            node.add(new ASTreeNode());
+            helper(tokens, node.getNth(0));
+            helper(tokens, node.getNth(1));
         } else {
             return;
         }
@@ -48,18 +47,16 @@ public class Parser {
 
 class ASTreeNode {
     private AbstractMap.SimpleEntry<String, Lexer.TokType> data;
-    private ASTreeNode left = null, right = null;
+    public LinkedList<ASTreeNode> childList;
 
     public ASTreeNode() {
         data = null;
-        left = null;
-        right = null;
+        childList = new LinkedList<>();
     }
 
     public ASTreeNode(AbstractMap.SimpleEntry<String, Lexer.TokType> d) {
         this.data = d;
-        left = null;
-        right = null;
+        childList = new LinkedList<>();
     }
 
     public AbstractMap.SimpleEntry<String, Lexer.TokType> getData() {
@@ -70,20 +67,12 @@ class ASTreeNode {
         this.data = data;
     }
 
-    public ASTreeNode getLeft() {
-        return left;
+    public ASTreeNode getNth(int n) {
+        return childList.get(n);
     }
 
-    public ASTreeNode getRight() {
-        return right;
-    }
-
-    public void setLeft(ASTreeNode left) {
-        this.left = left;
-    }
-
-    public void setRight(ASTreeNode right) {
-        this.right = right;
+    public void add(ASTreeNode left) {
+        childList.add(left);
     }
 }
 
@@ -107,12 +96,8 @@ class ASTree {
             System.out.printf("%-10s", currentNode.getData().getKey());
             current--;
 
-            if (currentNode.getLeft() != null) {
-                queue.offer(currentNode.getLeft());
-                next++;
-            }
-            if (currentNode.getRight() != null) {
-                queue.offer(currentNode.getRight());
+            for (ASTreeNode node : currentNode.childList) {
+                queue.offer(node);
                 next++;
             }
             if (current == 0) {
