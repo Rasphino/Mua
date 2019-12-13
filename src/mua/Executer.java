@@ -65,6 +65,36 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
+        } else if (opr_name.equals("isnumber")) {
+            String key = node.getNth(0).getData().getKey();
+            if (namespace.containsKey(key) && node.getNth(0).getData().getValue() == Lexer.TokType.Word && isParseableNumber(key))
+                node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
+            else
+                node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
+        } else if (opr_name.equals("isword")) {
+            String key = node.getNth(0).getData().getKey();
+            if (namespace.containsKey(key) && node.getNth(0).getData().getValue() == Lexer.TokType.Word)
+                node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
+            else
+                node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
+        } else if (opr_name.equals("islist")) {
+            String key = node.getNth(0).getData().getKey();
+            if (namespace.containsKey(key) && node.getNth(0).getData().getValue() == Lexer.TokType.List)
+                node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
+            else
+                node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
+        } else if (opr_name.equals("isbool")) {
+            String key = node.getNth(0).getData().getKey();
+            if (namespace.containsKey(key) && (key.equals("true") || key.equals("false") || key.equals("\"true") || key.equals("\"false")))
+                node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
+            else
+                node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
+        } else if (opr_name.equals("isempty")) {
+            String key = node.getNth(0).getData().getKey();
+            if (namespace.containsKey(key) && namespace.get(key).equals(""))
+                node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
+            else
+                node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
         } else if (opr_name.equals("read")) {
             String value;
             value = Main.in.nextLine();

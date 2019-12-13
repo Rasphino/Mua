@@ -8,7 +8,7 @@ public class Lexer {
     ));
 
     public static HashSet<String> exp_name = new HashSet<>(Arrays.asList(
-            "thing", "isname", "read", "readlist"
+            "thing", "isname", "isnumber", "isword", "islist", "isbool", "isempty", "read", "readlist"
     ));
 
     public static HashSet<String> opr_1_name = new HashSet<>(Arrays.asList(
