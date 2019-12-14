@@ -15,17 +15,27 @@ public class Main {
 
     public static void main(String[] args) {
         namespace.add(new HashMap<>());
-        String cmd_in;
-        int idx;
+        String cmd_in, cmd = "";
+        int bcnt = 0, ecnt = 0;
 
         if (DEBUG)
             System.out.print(">>> ");
 
         while (in.hasNextLine() && !(cmd_in = in.nextLine()).equals("exit")) {
-            List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(cmd_in);
+            cmd = "";
+            do {
+                cmd += cmd_in;
+                for (int i = 0; i < cmd_in.length(); i++) {
+                    if (cmd_in.charAt(i) == '[') bcnt++;
+                    if (cmd_in.charAt(i) == ']') ecnt++;
+                }
+            } while (bcnt != ecnt && !(cmd_in = in.nextLine()).equals("exit"));
 
-            if (DEBUG)
+            List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(cmd);
+            if (DEBUG) {
+                System.out.println(cmd);
                 System.out.println("tokens: " + tokens);
+            }
 
             List<ASTree> trees = Parser.parse(tokens, namespace);
             for (ASTree tree : trees) {
