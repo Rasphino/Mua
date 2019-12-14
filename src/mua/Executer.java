@@ -20,7 +20,8 @@ public class Executer {
         for (ASTreeNode c : node.childList) {
             if (c != null && (c.getData().getValue() == Lexer.TokType.Operator_1 ||
                     c.getData().getValue() == Lexer.TokType.Operator_2 ||
-                    c.getData().getValue() == Lexer.TokType.ExpressTok)) {
+                    c.getData().getValue() == Lexer.TokType.ExpressTok ||
+                    c.getData().getValue() == Lexer.TokType.Unknown)) {
                 helper(c, _namespace);
             }
         }
@@ -33,6 +34,15 @@ public class Executer {
         } else if (opr_name.equals("print")) {
             String value = node.getNth(0).getData().getKey();
             System.out.println(value);
+        } else if (opr_name.equals("stop")) {
+            return;
+        } else if (opr_name.equals("output")) {
+            String value = node.getNth(0).getData().getKey();
+            namespace.put("__out", value);
+        } else if (opr_name.equals("export")) {
+            String key = node.getNth(0).getData().getKey();
+            String value = namespace.get(key);
+            _namespace.getFirst().put(key, value);
         } else if (opr_name.equals("repeat")) {
             int time = parseInt(node.getNth(0).getData().getKey());
             String list = node.getNth(1).getData().getKey();
@@ -187,8 +197,9 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
-        } else if (namespace.containsKey(opr_name)) {
-            String list = namespace.get(opr_name);
+        } else if (Parser.getFuncNamespaceID(opr_name, _namespace) >= 0) {
+            int id = Parser.getFuncNamespaceID(opr_name, _namespace);
+            String list = _namespace.get(id).get(opr_name);
             HashMap<String, String> local_namespace = new HashMap<>();
             ArrayList<String> tmp = new ArrayList<>(Arrays.asList(list
                     .trim()
@@ -202,7 +213,7 @@ public class Executer {
                 } else if (cnt == 1) local_namespace.put(s, node.getNth(i++).getData().getKey());
             }
             _namespace.add(local_namespace);
-            System.out.println(local_namespace);
+//            System.out.println(local_namespace);
 
             cnt = 0;
             for (i = 0; i < list.length(); i++) {
@@ -213,13 +224,16 @@ public class Executer {
             }
             String opr_list = list.substring(i + 1);
             opr_list = opr_list.substring(opr_list.indexOf('[') + 1, opr_list.lastIndexOf(']'));
-            System.out.println(opr_list);
+//            System.out.println(opr_list);
 
             List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(opr_list);
             List<src.mua.ASTree> trees = Parser.parse(tokens, _namespace);
 
             for (src.mua.ASTree tree : trees) {
                 Executer.execute(tree, _namespace);
+            }
+            if (local_namespace.containsKey("__out")) {
+                node.setData(new AbstractMap.SimpleEntry<>(local_namespace.get("__out"), Lexer.TokType.Word));
             }
             _namespace.removeLast();
 

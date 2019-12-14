@@ -4,15 +4,15 @@ import java.util.*;
 
 public class Lexer {
     public static HashSet<String> state_name = new HashSet<>(Arrays.asList(
-            "make", "erase", "print", "repeat"
+            "make", "erase", "print", "repeat", "stop"
     ));
 
     public static HashSet<String> exp_name = new HashSet<>(Arrays.asList(
-            "thing", "isname", "isnumber", "isword", "islist", "isbool", "isempty", "read", "readlist"
+            "read", "readlist"
     ));
 
     public static HashSet<String> opr_1_name = new HashSet<>(Arrays.asList(
-            "not"
+            "not", "thing", "isname", "isnumber", "isword", "islist", "isbool", "isempty", "output", "export"
     ));
 
     public static HashSet<String> opr_2_name = new HashSet<>(Arrays.asList(

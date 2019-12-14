@@ -51,7 +51,7 @@ public class Parser {
             int id = getFuncNamespaceID(tok.getKey(), namespace);
             String list = namespace.get(id).get(tok.getKey());
             int size = cntFuncParamSize(list);
-            System.out.println(size);
+//            System.out.println(size);
             for (int i = 0; i < size; i++) {
                 node.add(new ASTreeNode());
                 helper(tokens, node.getNth(i), namespace);
@@ -61,7 +61,7 @@ public class Parser {
         }
     }
 
-    private static int getFuncNamespaceID(String func, LinkedList<HashMap<String, String>> _namespace) {
+    public static int getFuncNamespaceID(String func, LinkedList<HashMap<String, String>> _namespace) {
         Iterator<HashMap<String, String>> itr = _namespace.descendingIterator();
         int i = _namespace.size();
         while (itr.hasNext()) {
