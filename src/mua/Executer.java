@@ -18,7 +18,7 @@ public class Executer {
     private static void helper(ASTreeNode node, LinkedList<HashMap<String, String>> _namespace) {
         HashMap<String, String> namespace = _namespace.getLast();
         for (ASTreeNode c : node.childList) {
-            if (c != null && (c.getData().getValue() == Lexer.TokType.Operator_1 ||
+            if (c != null && c.getData() != null && (c.getData().getValue() == Lexer.TokType.Operator_1 ||
                     c.getData().getValue() == Lexer.TokType.Operator_2 ||
                     c.getData().getValue() == Lexer.TokType.ExpressTok ||
                     c.getData().getValue() == Lexer.TokType.Unknown)) {
@@ -43,6 +43,19 @@ public class Executer {
             String key = node.getNth(0).getData().getKey();
             String value = namespace.get(key);
             _namespace.getFirst().put(key, value);
+        } else if (opr_name.equals("if")) {
+            String bool = node.getNth(0).getData().getKey();
+            String list;
+            if (bool.equals("true") || bool.equals("\"true"))
+                list = node.getNth(1).getData().getKey();
+            else
+                list = node.getNth(2).getData().getKey();
+
+            List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(list);
+            List<src.mua.ASTree> trees = Parser.parse(tokens, _namespace);
+            for (src.mua.ASTree tree : trees) {
+                Executer.execute(tree, _namespace);
+            }
         } else if (opr_name.equals("repeat")) {
             int time = parseInt(node.getNth(0).getData().getKey());
             String list = node.getNth(1).getData().getKey();
@@ -197,7 +210,7 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
-        } else if (Parser.getFuncNamespaceID(opr_name, _namespace) >= 0) {
+        } else if (Parser.isFunc(opr_name, _namespace) && Parser.getFuncNamespaceID(opr_name, _namespace) >= 0) {
             int id = Parser.getFuncNamespaceID(opr_name, _namespace);
             String list = _namespace.get(id).get(opr_name);
             HashMap<String, String> local_namespace = new HashMap<>();

@@ -33,7 +33,7 @@ public class Parser {
         AbstractMap.SimpleEntry<String, Lexer.TokType> tok = tokens.get(i++);
         node.setData(tok);
         Lexer.TokType type = tok.getValue();
-        if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make") && !tok.getKey().equals("repeat")) ||
+        if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make") && !tok.getKey().equals("repeat") && !tok.getKey().equals("if")) ||
                 (type == Lexer.TokType.ExpressTok && !tok.getKey().equals("read") && !tok.getKey().equals("readlist")) ||
                 type == Lexer.TokType.Operator_1) {
             node.add(new ASTreeNode());
@@ -43,11 +43,26 @@ public class Parser {
             node.add(new ASTreeNode());
             helper(tokens, node.getNth(0), namespace);
             helper(tokens, node.getNth(1), namespace);
-        } else if (tok.getKey().equals("make")) {
-            node.add(new ASTreeNode(tokens.get(i++)));
+        } else if (tok.getKey().equals("if")) {
             node.add(new ASTreeNode());
+            node.add(new ASTreeNode());
+            node.add(new ASTreeNode());
+            helper(tokens, node.getNth(0), namespace);
             helper(tokens, node.getNth(1), namespace);
-        } else if (getFuncNamespaceID(tok.getKey(), namespace) >= 0) {
+            helper(tokens, node.getNth(2), namespace);
+        } else if (tok.getKey().equals("make")) {
+            AbstractMap.SimpleEntry<String, Lexer.TokType> next_tok = tokens.get(i);
+            if (next_tok.getValue() == Lexer.TokType.Word) {
+                node.add(new ASTreeNode(tokens.get(i++)));
+                node.add(new ASTreeNode());
+                helper(tokens, node.getNth(1), namespace);
+            } else {
+                node.add(new ASTreeNode());
+                node.add(new ASTreeNode());
+                helper(tokens, node.getNth(0), namespace);
+                helper(tokens, node.getNth(1), namespace);
+            }
+        } else if (isFunc(tok.getKey(), namespace) && getFuncNamespaceID(tok.getKey(), namespace) >= 0) {
             int id = getFuncNamespaceID(tok.getKey(), namespace);
             String list = namespace.get(id).get(tok.getKey());
             int size = cntFuncParamSize(list);
@@ -74,7 +89,7 @@ public class Parser {
         return -1;
     }
 
-    private static int cntFuncParamSize(String list) {
+    public static int cntFuncParamSize(String list) {
         int cnt = 0, len = 0;
         ArrayList<String> tmp = new ArrayList<>(Arrays.asList(list
                 .trim()
@@ -87,6 +102,25 @@ public class Parser {
             } else if (cnt == 1) len++;
         }
         return len;
+    }
+
+    public static boolean isFunc(String list) {
+        int res = 0, c = 0;
+        for (int i = 0; i < list.length(); i++) {
+            if (list.charAt(i) == ' ') continue;
+            else if (list.charAt(i) == '[') c++;
+            else if (list.charAt(i) == ']') {
+                if (--c == 0) res++;
+            }
+        }
+        return res == 2;
+    }
+
+    public static boolean isFunc(String func, LinkedList<HashMap<String, String>> namespace) {
+        int id = getFuncNamespaceID(func, namespace);
+        if (id < 0) return false;
+        String list = namespace.get(id).get(func);
+        return isFunc(list);
     }
 }
 

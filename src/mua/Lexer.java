@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Lexer {
     public static HashSet<String> state_name = new HashSet<>(Arrays.asList(
-            "make", "erase", "print", "repeat", "stop"
+            "make", "erase", "print", "repeat", "stop", "if"
     ));
 
     public static HashSet<String> exp_name = new HashSet<>(Arrays.asList(
