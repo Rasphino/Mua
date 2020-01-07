@@ -2,67 +2,114 @@ import src.mua.Main;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
 public class Test {
-    private static final String[] input =
-            {
-                    "make \"a 6\n" +
-                            "print :a\n" +
-                            "make \"b \"a\n" +
-                            "print thing :b\n" +
-                            "make \"c mul add :a 13 :a\n" +
-                            "print sub :c \"6\n" +
-                            "make \"d read\n" +
-                            "1234\n" +
-                            "print isname \"d\n" +
-                            "print :d\n" +
-                            "make \"x eq :d 1234\n" +
-                            "print :x\n" +
-                            "erase \"d\n" +
-                            "print not isname \"d\n"
-            };
-    private static final Object[][] result = {
-            {6.0,
-                    6.0,
-                    108.0,
-                    "true",
-                    "1234",
-                    "true",
-                    "true"}
-    };
+    private static enum Type {
+        WORD {
+            public boolean compare(String a, String b) {
+                return a.equals(b);
+            }
+        },
+        NUMBER {
+            public boolean compare(String a, String b) {
+                boolean ret = false;
+                try {
+                    BigDecimal d1 = new BigDecimal(Double.parseDouble(a));
+                    BigDecimal d2 = new BigDecimal(Double.parseDouble(b));
+                    ret = d1.equals(d2);
+                } catch (Exception e) {
+
+                }
+                return ret;
+            }
+        };
+        public boolean compare(String a, String b) {
+            return false;
+        }
+    }
+    private static class Value {
+        private Type type;
+        private String value;
+        private int mark;
+        private String comment;
+        public void read(Scanner in) {
+            String line = in.nextLine();
+            String[] a = line.split(",");
+            this.type = Type.valueOf(a[0].toUpperCase());
+            this.value = a[1];
+            this.mark = Integer.valueOf(a[2]);
+            this.comment = a[3];
+        }
+        public boolean judge(String line) {
+            return type.compare(line, value);
+        }
+        public int getMark() {
+            return mark;
+        }
+        public String getComment() {
+            return comment;
+        }
+        @Override
+        public String toString() {
+            return type+","+value+","+mark+","+comment;
+        }
+    }
     public static void main(String[] args) throws IOException {
+        //  prepare standard output and input
+        ArrayList<Value> alValue = new ArrayList<>();
+        Scanner sout = new Scanner(
+                new FileInputStream("stdout")
+        );
+        while (sout.hasNext()) {
+            Value v = new Value();
+            v.read(sout);
+            alValue.add(v);
+        }
+        sout.close();
+        FileInputStream cin = new FileInputStream("in");
+        //  piped stream to get app's output
         PipedOutputStream pos = new PipedOutputStream();
         PipedInputStream pin = new PipedInputStream(pos);
-        int cnt = 0;
-        for ( int i = 0; i<input.length; i++ ) {
-            String case1 = input[i];
-            ByteArrayInputStream cin = new ByteArrayInputStream(case1.getBytes());
-            PrintStream cout = new PrintStream(pos, true);
-            System.setIn(cin);
-            System.setOut(cout);
-            Main.main(null);
-            cout.flush();
-            cout.close();
-            Scanner in = new Scanner(pin);
-            int idx = 0;
-            while (in.hasNext()) {
-                String w = in.next();
-                if (result[i][idx] instanceof String) {
-                    cnt += result[i][idx].equals(w) ? 1 : 0;
-                } else {
-                    BigDecimal a = new BigDecimal((Double) result[i][idx]);
-                    BigDecimal b = new BigDecimal(Double.parseDouble(w));
-                    cnt += a.compareTo(b)==0?1:0;
-                }
-                idx++;
-            }
-        }
-        PrintWriter out = new PrintWriter(
+        PrintStream cout = new PrintStream(pos, true);
+        System.setIn(cin);
+        System.setOut(cout);
+        System.setErr(cout);
+        //  for result output
+        PrintWriter resultout = new PrintWriter(
                 new OutputStreamWriter(
                         new FileOutputStream(args[0])
                 ));
-        out.println(cnt);
-        out.close();
+        //  execution
+        int mark = 0;
+        try {
+            Main.main(null);
+            cout.flush();
+            cout.close();
+            //  read app's output
+            Scanner in = new Scanner(pin);
+//            while ( in.hasNextLine() ) {
+//                resultout.println(in.nextLine());
+//            }
+            Iterator<Value> it = alValue.iterator();
+            while (in.hasNext() && it.hasNext()) {
+                String line = in.nextLine();
+                Value v = it.next();
+                if ( v.judge(line) ) {
+                    mark += v.getMark();
+                    resultout.println(v.comment+": PASS");
+                } else {
+                    resultout.print(v.comment+": FAIL");
+                    resultout.println("###"+line+":"+v.toString()+"###");
+                }
+            }
+        } catch (Throwable e) {
+            resultout.println(e.getClass());
+        }
+        resultout.println(mark);
+        resultout.close();
+        cin.close();
     }
 }

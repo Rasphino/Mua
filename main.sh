@@ -1,6 +1,6 @@
 #!/bin/bash
 function itdir(){
-    rm *.class
+    rm -f *.class
     for element in `ls`
     do  
         if [ -d $element ]
@@ -12,11 +12,12 @@ function itdir(){
     done
 }
 
-echo "cleaning"
+#echo "cleaning"
 itdir "."
-echo "compiling"
+#echo "compiling"
 javac Test.java
-echo "executing"
+#echo "executing"
 java Test $1
-echo "cleaning"
-itdir "."
+#cat $1
+#echo "cleaning"
+#itdir "."
