@@ -40,7 +40,7 @@ public class Executer {
             } catch (IOException e) {
             }
             for (Map.Entry<String, String> entry : namespace.entrySet()) {
-                System.out.println(entry.getKey() + "_:_" + entry.getValue());
+                System.out.println("make \"" + entry.getKey() + " " + entry.getValue());
             }
             System.setOut(ps);
         } else if (opr_name.equals("load")) {
@@ -52,11 +52,11 @@ public class Executer {
 
                 String line;
                 while ((line = br.readLine()) != null) {
-                    ArrayList<String> tmp = new ArrayList<>(Arrays.asList(line
-                            .trim()
-                            .split("_:_")));
-                    tmp.replaceAll(String::trim);
-                    namespace.put(tmp.get(0), tmp.get(1));
+                    List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(line);
+                    List<ASTree> trees = Parser.parse(tokens, _namespace);
+                    for (ASTree tree : trees) {
+                        Executer.execute(tree, _namespace);
+                    }
                 }
             } catch (IOException e) {
             }
