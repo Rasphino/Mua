@@ -3,7 +3,7 @@ number,5,1,2+3
 number,4,1,f 2
 number,16,1,(f 2 * 4)
 number,2.5,1,(2*(2+3)/4)
-word,a b,1,sentence [a] b
+word,a b,1,print sentence [a] "b
 word,a [a b] c,1,print sentence [a [a b]] [c]
 word,a b,1,print sentence "a "b
 word,a [b],1,print list "a [b]

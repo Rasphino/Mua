@@ -54,7 +54,6 @@ make "reverse [
                     [output join reverse butfirst :x first :x]
                     [output word reverse butfirst :x first :x]
             ]
-        ]
     ]
 ]
 print reverse [1 2 3]
