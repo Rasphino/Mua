@@ -33,7 +33,7 @@ public class Parser {
         AbstractMap.SimpleEntry<String, Lexer.TokType> tok = tokens.get(i++);
         node.setData(tok);
         Lexer.TokType type = tok.getValue();
-        if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make") && !tok.getKey().equals("repeat") && !tok.getKey().equals("if")) ||
+        if ((type == Lexer.TokType.StateTok && !tok.getKey().equals("make") && !tok.getKey().equals("repeat") && !tok.getKey().equals("if") && !tok.getKey().equals("erall")) ||
                 (type == Lexer.TokType.ExpressTok && !tok.getKey().equals("read") && !tok.getKey().equals("readlist")) ||
                 type == Lexer.TokType.Operator_1) {
             node.add(new ASTreeNode());

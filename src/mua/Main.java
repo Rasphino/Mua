@@ -8,13 +8,15 @@ import src.mua.ASTree;
 import src.mua.Executer;
 
 public class Main {
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
 
     public static Scanner in = new Scanner(System.in);
     public static LinkedList<HashMap<String, String>> namespace = new LinkedList<>();
 
     public static void main(String[] args) {
         namespace.add(new HashMap<>());
+        namespace.getFirst().put("pi", "3.14159");
+
         String cmd_in, cmd = "";
         int bcnt = 0, ecnt = 0;
 

@@ -1,5 +1,6 @@
 package src.mua;
 
+import java.io.*;
 import java.util.*;
 
 import src.mua.ASTree;
@@ -31,6 +32,36 @@ public class Executer {
             String key = node.getNth(0).getData().getKey();
             String value = node.getNth(1).getData().getKey();
             namespace.put(key, value);
+        } else if (opr_name.equals("save")) {
+            String name = node.getNth(0).getData().getKey();
+            PrintStream ps = System.out;
+            try {
+                System.setOut(new PrintStream(new java.io.File(name)));
+            } catch (IOException e) {
+            }
+            for (Map.Entry<String, String> entry : namespace.entrySet()) {
+                System.out.println(entry.getKey() + "_:_" + entry.getValue());
+            }
+            System.setOut(ps);
+        } else if (opr_name.equals("load")) {
+            String name = node.getNth(0).getData().getKey();
+            try {
+                InputStream is = new FileInputStream(name);
+                InputStreamReader ir = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(ir);
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    ArrayList<String> tmp = new ArrayList<>(Arrays.asList(line
+                            .trim()
+                            .split("_:_")));
+                    tmp.replaceAll(String::trim);
+                    namespace.put(tmp.get(0), tmp.get(1));
+                }
+            } catch (IOException e) {
+            }
+        } else if (opr_name.equals("erall")) {
+            namespace.clear();
         } else if (opr_name.equals("print")) {
             String value = node.getNth(0).getData().getKey();
             System.out.println(value);
@@ -65,6 +96,13 @@ public class Executer {
                 for (src.mua.ASTree tree : trees) {
                     Executer.execute(tree, _namespace);
                 }
+            }
+        } else if (opr_name.equals("run")) {
+            String list = node.getNth(0).getData().getKey();
+            List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(list);
+            List<src.mua.ASTree> trees = Parser.parse(tokens, _namespace);
+            for (src.mua.ASTree tree : trees) {
+                Executer.execute(tree, _namespace);
             }
         } else if (opr_name.equals("thing")) {
             String key = node.getNth(0).getData().getKey();
