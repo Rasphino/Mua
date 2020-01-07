@@ -26,7 +26,7 @@ public class Main {
         while (in.hasNextLine() && !(cmd_in = in.nextLine()).equals("exit")) {
             cmd = "";
             do {
-                cmd += cmd_in;
+                cmd += " " + cmd_in;
                 for (int i = 0; i < cmd_in.length(); i++) {
                     if (cmd_in.charAt(i) == '[') bcnt++;
                     if (cmd_in.charAt(i) == ']') ecnt++;

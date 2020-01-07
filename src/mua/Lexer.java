@@ -28,69 +28,45 @@ public class Lexer {
     }
 
     public static ArrayList<AbstractMap.SimpleEntry<String, TokType>> parse(String stmt) {
-        ArrayList<String> tmp = new ArrayList<>(Arrays.asList(stmt
-                .replace("(", " ( ")
-                .replace(")", " ) ")
-                .replace("[", " [ ")
-                .replace("]", " ] ")
-                .replace(":", "thing \"")
-                .trim()
-                .split("\\s+")
-        ));
-        tmp.replaceAll(String::trim);
-
-        // deal with comment
-        int idx;
-        if ((idx = tmp.indexOf("//")) != -1) tmp.subList(idx, tmp.size()).clear();
-
+        stmt = stmt.replace(":", "thing \"");
+        stmt += " ";
         ArrayList<AbstractMap.SimpleEntry<String, TokType>> tokens = new ArrayList<>();
-        TokType type = TokType.Unknown;
-        int listCnt = 0;
-        String list = "";
-        for (int i = 0; i < tmp.size(); i++) {
-            String now_tok = tmp.get(i);
-
-            if (now_tok.equals("true") || now_tok.equals("false")) {
-                type = TokType.Word;
-            } else if (isNumeric(now_tok)) {
-                type = TokType.Word;
-            } else if (state_name.contains(now_tok)) {
-                type = TokType.StateTok;
-            } else if (opr_1_name.contains(now_tok)) {
-                type = TokType.Operator_1;
-            } else if (opr_2_name.contains(now_tok)) {
-                type = TokType.Operator_2;
-            } else if (exp_name.contains(now_tok)) {
-                type = TokType.ExpressTok;
-            } else if (now_tok.startsWith("\"")) {
-                now_tok = now_tok.substring(1);
-                type = TokType.Word;
-            } else if (now_tok.equals("[")) {
-                if (listCnt++ == 0) {
-                    continue;
-                }
-            } else if (now_tok.equals("]")) {
-                if (--listCnt == 0) {
-                    tokens.add(new AbstractMap.SimpleEntry<>(list, TokType.List));
-                    list = "";
-                    continue;
-                }
-            } else {
-                type = TokType.Unknown;
-            }
-
-            if (listCnt > 0) {
-                if (list.equals(""))
-                    list = now_tok;
-                else if ((i - 1 > 0 && tmp.get(i - 1).equals("[")) || now_tok.equals("]")) {
-                    list = list + now_tok;
+        String tok = "";
+        int c = 0;
+        for (int i = 0; i < stmt.length(); i++) {
+            if (stmt.charAt(i) == '[') {
+                c++;
+                tok += stmt.charAt(i);
+            } else if (stmt.charAt(i) == ']') {
+                if (--c == 0) {
+                    tokens.add(new AbstractMap.SimpleEntry<>(tok + "]", TokType.List));
+                    tok = "";
                 } else
-                    list = list + " " + now_tok;
-//                list = list + " " + now_tok;
-                continue;
+                    tok += stmt.charAt(i);
+            } else if ((stmt.charAt(i) == ' ' || stmt.charAt(i) == '\t') && c == 0) {
+                if (tok.equals("")) continue;
+                TokType type = TokType.Unknown;
+                if (tok.equals("true") || tok.equals("false")) {
+                    type = TokType.Word;
+                } else if (isNumeric(tok)) {
+                    type = TokType.Word;
+                } else if (state_name.contains(tok)) {
+                    type = TokType.StateTok;
+                } else if (opr_1_name.contains(tok)) {
+                    type = TokType.Operator_1;
+                } else if (opr_2_name.contains(tok)) {
+                    type = TokType.Operator_2;
+                } else if (exp_name.contains(tok)) {
+                    type = TokType.ExpressTok;
+                } else if (tok.startsWith("\"")) {
+                    tok = tok.substring(1);
+                    type = TokType.Word;
+                }
+                tokens.add(new AbstractMap.SimpleEntry<>(tok, type));
+                tok = "";
+            } else {
+                tok += stmt.charAt(i);
             }
-
-            tokens.add(new AbstractMap.SimpleEntry<>(now_tok, type));
         }
         return tokens;
     }
@@ -102,5 +78,15 @@ public class Lexer {
             return false;
         }
         return true;
+    }
+
+    public static boolean isList(String str) {
+        if (str.length() < 2) return false;
+        String t = str.trim();
+        return t.charAt(0) == '[' && t.charAt(t.length() - 1) == ']';
+    }
+
+    public static String getListContent(String list) {
+        return list.substring(1, list.length() - 1).trim();
     }
 }

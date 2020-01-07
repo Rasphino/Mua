@@ -62,9 +62,9 @@ public class Parser {
                 helper(tokens, node.getNth(0), namespace);
                 helper(tokens, node.getNth(1), namespace);
             }
-        } else if (isFunc(tok.getKey(), namespace) && getFuncNamespaceID(tok.getKey(), namespace) >= 0) {
+        } else if (isFunc(tok.getKey(), namespace)) {
             int id = getFuncNamespaceID(tok.getKey(), namespace);
-            String list = namespace.get(id).get(tok.getKey());
+            String list = Lexer.getListContent(namespace.get(id).get(tok.getKey()));
             int size = cntFuncParamSize(list);
 //            System.out.println(size);
             for (int i = 0; i < size; i++) {
@@ -106,10 +106,12 @@ public class Parser {
         return len;
     }
 
-    public static boolean isFunc(String list) {
+    public static boolean isFunc(String _list) {
+        if (!Lexer.isList(_list)) return false;
+        String list = Lexer.getListContent(_list);
         int res = 0, c = 0;
         for (int i = 0; i < list.length(); i++) {
-            if (list.charAt(i) == ' ') continue;
+            if (list.charAt(i) == ' ' || list.charAt(i) == '\t') continue;
             else if (list.charAt(i) == '[') c++;
             else if (list.charAt(i) == ']') {
                 if (--c == 0) res++;
