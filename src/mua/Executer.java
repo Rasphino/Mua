@@ -22,6 +22,7 @@ public class Executer {
             if (c != null && c.getData() != null && (c.getData().getValue() == Lexer.TokType.Operator_1 ||
                     c.getData().getValue() == Lexer.TokType.Operator_2 ||
                     c.getData().getValue() == Lexer.TokType.ExpressTok ||
+                    c.getData().getValue() == Lexer.TokType.Math ||
                     c.getData().getValue() == Lexer.TokType.Unknown)) {
                 helper(c, _namespace);
             }
@@ -377,8 +378,119 @@ public class Executer {
                     node.setData(new AbstractMap.SimpleEntry<>("[" + res + "]", Lexer.TokType.List));
                 }
             }
+        } else if (node.getData().getValue() == Lexer.TokType.Math) {
+            // 真的傻逼
+            String s_ = node.getData().getKey().replace("thing \"", ":");
+            s_ = s_.substring(1, s_.length() - 1);
+            String s = "";
+            boolean in_neg = false;
+            for (int i = 0; i < s_.length(); i++) {
+                if (s_.charAt(i) == '-' && (i == 0 || isMathOpr(s_.substring(i - 1, i)) ||
+                        s_.substring(i - 1, i).equals("("))) {
+                    in_neg = true;
+                    s += "(0-";
+                } else if (in_neg && isMathOpr(s_.substring(i, i + 1))) {
+                    in_neg = false;
+                    s += ")" + s_.charAt(i);
+                } else {
+                    s += s_.charAt(i);
+                }
+            }
+//            System.out.println(s);
+            ArrayList<String> tmp = new ArrayList<>(Arrays.asList(s
+                    .replace("+", " + ")
+                    .replace("-", " - ")
+                    .replace("*", " * ")
+                    .replace("/", " / ")
+                    .replace("%", " % ")
+                    .replace("(", " ( ")
+                    .replace(")", " ) ")
+                    .trim()
+                    .split("\\s+")));
+            tmp.replaceAll(String::trim);
+//            System.out.println(tmp);
+
+            // thing
+            for (int i = 0; i < tmp.size(); i++) {
+                if (tmp.get(i).startsWith(":")) {
+                    String key = tmp.get(i).substring(1);
+                    String value = null;
+                    Iterator<HashMap<String, String>> itr = _namespace.descendingIterator();
+                    while (itr.hasNext()) {
+                        HashMap<String, String> tmp_ = itr.next();
+                        if (tmp_.containsKey(key)) {
+                            value = tmp_.get(key);
+                            break;
+                        }
+                    }
+                    tmp.set(i, value);
+                }
+            }
+//            System.out.println(tmp);
+
+            Stack<String> s1 = new Stack<>();
+            Stack<String> s2 = new Stack<>();
+            for (int i = 0; i < tmp.size(); i++) {
+                String tok = tmp.get(i);
+                if (isParseableNumber(tok)) {
+                    s1.push(tok);
+
+                    if (!s2.empty() && Parser.isFunc(s2.peek(), _namespace)) {
+                        String func = s2.pop();
+                        String val = s1.pop();
+                        List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse("output " + func + " " + val);
+                        List<ASTree> trees = Parser.parse(tokens, _namespace);
+                        for (ASTree tree : trees) {
+                            Executer.execute(tree, _namespace);
+                        }
+                        s1.push(namespace.get("__out"));
+                        continue;
+                    }
+
+                    while (!s2.empty() && isMathOpr(s2.peek())) {
+                        String op = s2.pop();
+                        double right = parseDouble(s1.pop());
+                        double left = parseDouble(s1.pop());
+                        s1.push(solveMath(left, op, right) + "");
+                    }
+
+                } else if (tok.equals(")")) {
+                    s2.pop();
+                    while (!s2.empty() && isMathOpr(s2.peek())) {
+                        String op = s2.pop();
+                        double right = parseDouble(s1.pop());
+                        double left = parseDouble(s1.pop());
+                        s1.push(solveMath(left, op, right) + "");
+                    }
+
+                } else {
+                    s2.push(tok);
+                }
+            }
+
+
+            node.setData(new AbstractMap.SimpleEntry<>(s1.pop() + "", Lexer.TokType.Word));
         } else {
         }
+    }
+
+    private static double solveMath(double left, String op, double right) {
+        if (op.equals("+")) {
+            return left + right;
+        } else if (op.equals("-")) {
+            return left - right;
+        } else if (op.equals("*")) {
+            return left * right;
+        } else if (op.equals("/")) {
+            return left / right;
+        } else if (op.equals("%")) {
+            return left % right;
+        }
+        return -1;
+    }
+
+    private static boolean isMathOpr(String c) {
+        return c.equals("+") || c.equals("-") || c.equals("*") || c.equals("/") || c.equals("%");
     }
 
     private static int parseInt(String num_str) {

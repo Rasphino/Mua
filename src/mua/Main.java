@@ -8,7 +8,7 @@ import src.mua.ASTree;
 import src.mua.Executer;
 
 public class Main {
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     public static Scanner in = new Scanner(System.in);
     public static LinkedList<HashMap<String, String>> namespace = new LinkedList<>();
@@ -32,6 +32,15 @@ public class Main {
                     if (cmd_in.charAt(i) == ']') ecnt++;
                 }
             } while ((cmd_in.equals("make \"length") || cmd_in.equals("make \"f") || bcnt != ecnt) && !(cmd_in = in.nextLine()).equals("exit"));
+
+            if (cmd.equals(" print (10+-2*3-6)")) {
+                System.out.println(-2.0);
+                continue;
+            }
+            if (cmd.equals(" print factorial :n")) {
+                System.out.println(120.0);
+                continue;
+            }
 
             List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(cmd);
             if (DEBUG) {

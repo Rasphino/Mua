@@ -24,7 +24,7 @@ public class Lexer {
     ));
 
     public enum TokType {
-        StateTok, ExpressTok, Word, Operator_1, Operator_2, List, Unknown
+        StateTok, ExpressTok, Word, Operator_1, Operator_2, List, Math, Unknown
     }
 
     public static ArrayList<AbstractMap.SimpleEntry<String, TokType>> parse(String stmt) {
@@ -40,6 +40,15 @@ public class Lexer {
             } else if (stmt.charAt(i) == ']') {
                 if (--c == 0) {
                     tokens.add(new AbstractMap.SimpleEntry<>(tok + "]", TokType.List));
+                    tok = "";
+                } else
+                    tok += stmt.charAt(i);
+            } else if (stmt.charAt(i) == '(') {
+                c++;
+                tok += stmt.charAt(i);
+            } else if (stmt.charAt(i) == ')') {
+                if (--c == 0) {
+                    tokens.add(new AbstractMap.SimpleEntry<>(tok + ")", TokType.Math));
                     tok = "";
                 } else
                     tok += stmt.charAt(i);
