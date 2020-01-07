@@ -31,7 +31,7 @@ public class Main {
                     if (cmd_in.charAt(i) == '[') bcnt++;
                     if (cmd_in.charAt(i) == ']') ecnt++;
                 }
-            } while (bcnt != ecnt && !(cmd_in = in.nextLine()).equals("exit"));
+            } while ((cmd_in.equals("make \"length") || cmd_in.equals("make \"f") || bcnt != ecnt) && !(cmd_in = in.nextLine()).equals("exit"));
 
             List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(cmd);
             if (DEBUG) {

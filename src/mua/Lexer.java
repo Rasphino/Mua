@@ -12,13 +12,15 @@ public class Lexer {
     ));
 
     public static HashSet<String> opr_1_name = new HashSet<>(Arrays.asList(
-            "not", "thing", "isname", "isnumber", "isword", "islist", "isbool", "isempty", "output", "export"
+            "not", "thing", "isname", "isnumber", "isword", "islist", "isbool", "isempty", "output", "export",
+            "first", "last", "butfirst", "butlast"
     ));
 
     public static HashSet<String> opr_2_name = new HashSet<>(Arrays.asList(
             "add", "sub", "mul", "div", "mod",
             "eq", "gt", "lt",
-            "and", "or"
+            "and", "or",
+            "word", "sentence", "list", "join"
     ));
 
     public enum TokType {
@@ -33,7 +35,8 @@ public class Lexer {
                 .replace("]", " ] ")
                 .replace(":", "thing \"")
                 .trim()
-                .split("\\s+")));
+                .split("\\s+")
+        ));
         tmp.replaceAll(String::trim);
 
         // deal with comment
@@ -63,7 +66,9 @@ public class Lexer {
                 now_tok = now_tok.substring(1);
                 type = TokType.Word;
             } else if (now_tok.equals("[")) {
-                if (listCnt++ == 0) continue;
+                if (listCnt++ == 0) {
+                    continue;
+                }
             } else if (now_tok.equals("]")) {
                 if (--listCnt == 0) {
                     tokens.add(new AbstractMap.SimpleEntry<>(list, TokType.List));
@@ -75,7 +80,13 @@ public class Lexer {
             }
 
             if (listCnt > 0) {
-                list = list + " " + now_tok;
+                if (list.equals(""))
+                    list = now_tok;
+                else if ((i - 1 > 0 && tmp.get(i - 1).equals("[")) || now_tok.equals("]")) {
+                    list = list + now_tok;
+                } else
+                    list = list + " " + now_tok;
+//                list = list + " " + now_tok;
                 continue;
             }
 

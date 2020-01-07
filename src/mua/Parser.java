@@ -92,6 +92,8 @@ public class Parser {
     public static int cntFuncParamSize(String list) {
         int cnt = 0, len = 0;
         ArrayList<String> tmp = new ArrayList<>(Arrays.asList(list
+                .replace("[", " [ ")
+                .replace("]", " ] ")
                 .trim()
                 .split("\\s+")));
         tmp.replaceAll(String::trim);
@@ -149,6 +151,10 @@ class ASTreeNode {
 
     public ASTreeNode getNth(int n) {
         return childList.get(n);
+    }
+
+    public void setNth(int n, ASTreeNode e) {
+        childList.set(n, e);
     }
 
     public void add(ASTreeNode left) {

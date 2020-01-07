@@ -115,8 +115,9 @@ public class Executer {
                     break;
                 }
             }
-            node.setData(new AbstractMap.SimpleEntry<>(value, Lexer.TokType.Word));
-            node.add(null);
+            List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(value);
+            node.setData(new AbstractMap.SimpleEntry<>(tokens.get(0).getKey(), tokens.get(0).getValue()));
+            node.setNth(0, null);
         } else if (opr_name.equals("erase")) {
             String key = node.getNth(0).getData().getKey();
             namespace.remove(key);
@@ -128,31 +129,31 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
         } else if (opr_name.equals("isnumber")) {
             String key = node.getNth(0).getData().getKey();
-            if (namespace.containsKey(key) && node.getNth(0).getData().getValue() == Lexer.TokType.Word && isParseableNumber(key))
+            if (node.getNth(0).getData().getValue() == Lexer.TokType.Word && isParseableNumber(key))
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
         } else if (opr_name.equals("isword")) {
             String key = node.getNth(0).getData().getKey();
-            if (namespace.containsKey(key) && node.getNth(0).getData().getValue() == Lexer.TokType.Word)
+            if (node.getNth(0).getData().getValue() == Lexer.TokType.Word)
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
         } else if (opr_name.equals("islist")) {
             String key = node.getNth(0).getData().getKey();
-            if (namespace.containsKey(key) && node.getNth(0).getData().getValue() == Lexer.TokType.List)
+            if (node.getNth(0).getData().getValue() == Lexer.TokType.List)
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
         } else if (opr_name.equals("isbool")) {
             String key = node.getNth(0).getData().getKey();
-            if (namespace.containsKey(key) && (key.equals("true") || key.equals("false") || key.equals("\"true") || key.equals("\"false")))
+            if (key.equals("true") || key.equals("false") || key.equals("\"true") || key.equals("\"false"))
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
         } else if (opr_name.equals("isempty")) {
             String key = node.getNth(0).getData().getKey();
-            if (namespace.containsKey(key) && namespace.get(key).equals(""))
+            if (key.equals(""))
                 node.setData(new AbstractMap.SimpleEntry<>("true", Lexer.TokType.Word));
             else
                 node.setData(new AbstractMap.SimpleEntry<>("false", Lexer.TokType.Word));
@@ -253,6 +254,8 @@ public class Executer {
             String list = _namespace.get(id).get(opr_name);
             HashMap<String, String> local_namespace = new HashMap<>();
             ArrayList<String> tmp = new ArrayList<>(Arrays.asList(list
+                    .replace("[", " [ ")
+                    .replace("]", " ] ")
                     .trim()
                     .split("\\s+")));
             tmp.replaceAll(String::trim);
@@ -261,7 +264,13 @@ public class Executer {
                 if (s.equals("[")) cnt++;
                 else if (s.equals("]")) {
                     if (--cnt == 0) break;
-                } else if (cnt == 1) local_namespace.put(s, node.getNth(i++).getData().getKey());
+                } else if (cnt == 1) {
+                    AbstractMap.SimpleEntry<String, Lexer.TokType> childnode = node.getNth(i++).getData();
+                    if (childnode.getValue() == Lexer.TokType.List)
+                        local_namespace.put(s, "[" + childnode.getKey() + "]");
+                    else
+                        local_namespace.put(s, childnode.getKey());
+                }
             }
             _namespace.add(local_namespace);
 //            System.out.println(local_namespace);
@@ -287,9 +296,91 @@ public class Executer {
                 node.setData(new AbstractMap.SimpleEntry<>(local_namespace.get("__out"), Lexer.TokType.Word));
             }
             _namespace.removeLast();
-
+        } else if (opr_name.equals("word")) {
+            String left_val = node.getNth(0).getData().getKey();
+            String right_val = node.getNth(1).getData().getKey();
+            node.setData(new AbstractMap.SimpleEntry<>(left_val + right_val, Lexer.TokType.Word));
+        } else if (opr_name.equals("sentence")) {
+            String left_val = node.getNth(0).getData().getKey();
+            String right_val = node.getNth(1).getData().getKey();
+            node.setData(new AbstractMap.SimpleEntry<>(left_val + " " + right_val, Lexer.TokType.List));
+        } else if (opr_name.equals("list")) {
+            String left_val = node.getNth(0).getData().getKey();
+            Lexer.TokType left_type = node.getNth(0).getData().getValue();
+            String right_val = node.getNth(1).getData().getKey();
+            Lexer.TokType right_type = node.getNth(1).getData().getValue();
+            if (left_type == Lexer.TokType.List && right_type == Lexer.TokType.List)
+                node.setData(new AbstractMap.SimpleEntry<>("[" + left_val + "] [" + right_val + "]", Lexer.TokType.List));
+            else if (left_type == Lexer.TokType.List)
+                node.setData(new AbstractMap.SimpleEntry<>("[" + left_val + "] " + right_val, Lexer.TokType.List));
+            else if (right_type == Lexer.TokType.List)
+                node.setData(new AbstractMap.SimpleEntry<>(left_val + " [" + right_val + "]", Lexer.TokType.List));
+            else
+                node.setData(new AbstractMap.SimpleEntry<>(left_val + " " + right_val, Lexer.TokType.List));
+        } else if (opr_name.equals("join")) {
+            String left_val = node.getNth(0).getData().getKey();
+            Lexer.TokType left_type = node.getNth(0).getData().getValue();
+            String right_val = node.getNth(1).getData().getKey();
+            Lexer.TokType right_type = node.getNth(1).getData().getValue();
+            if (right_type == Lexer.TokType.List)
+                node.setData(new AbstractMap.SimpleEntry<>(left_val + " [" + right_val + "]", Lexer.TokType.List));
+            else
+                node.setData(new AbstractMap.SimpleEntry<>(left_val + " " + right_val, Lexer.TokType.List));
+        } else if (opr_name.equals("first")) {
+            String val = node.getNth(0).getData().getKey();
+            Lexer.TokType type = node.getNth(0).getData().getValue();
+            if (type == Lexer.TokType.Word)
+                node.setData(new AbstractMap.SimpleEntry<>(val.substring(0, 1), Lexer.TokType.Word));
+            else {
+                List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(val);
+                if (tokens.get(0).getValue() == Lexer.TokType.List)
+                    node.setData(new AbstractMap.SimpleEntry<>(tokens.get(0).getKey(), Lexer.TokType.List));
+                else
+                    node.setData(new AbstractMap.SimpleEntry<>(tokens.get(0).getKey(), Lexer.TokType.Word));
+            }
+        } else if (opr_name.equals("last")) {
+            String val = node.getNth(0).getData().getKey();
+            Lexer.TokType type = node.getNth(0).getData().getValue();
+            if (type == Lexer.TokType.Word)
+                node.setData(new AbstractMap.SimpleEntry<>(val.substring(val.length() - 1), Lexer.TokType.Word));
+            else {
+                List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(val);
+                if (tokens.get(0).getValue() == Lexer.TokType.List)
+                    node.setData(new AbstractMap.SimpleEntry<>(tokens.get(tokens.size() - 1).getKey(), Lexer.TokType.List));
+                else
+                    node.setData(new AbstractMap.SimpleEntry<>(tokens.get(tokens.size() - 1).getKey(), Lexer.TokType.Word));
+            }
+        } else if (opr_name.equals("butfirst")) {
+            String val = node.getNth(0).getData().getKey();
+            Lexer.TokType type = node.getNth(0).getData().getValue();
+            if (type == Lexer.TokType.Word)
+                node.setData(new AbstractMap.SimpleEntry<>(val.substring(1).trim(), Lexer.TokType.Word));
+            else {
+                List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(val);
+                if (tokens.size() == 1)
+                    node.setData(new AbstractMap.SimpleEntry<>("", Lexer.TokType.Word));
+                else {
+                    String first = tokens.get(0).getKey();
+                    String res = val.substring(val.indexOf(first) + first.length() + 1).trim();
+                    node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.List));
+                }
+            }
+        } else if (opr_name.equals("butlast")) {
+            String val = node.getNth(0).getData().getKey();
+            Lexer.TokType type = node.getNth(0).getData().getValue();
+            if (type == Lexer.TokType.Word)
+                node.setData(new AbstractMap.SimpleEntry<>(val.substring(0, val.length() - 1), Lexer.TokType.Word));
+            else {
+                List<AbstractMap.SimpleEntry<String, Lexer.TokType>> tokens = Lexer.parse(val);
+                if (tokens.size() == 1)
+                    node.setData(new AbstractMap.SimpleEntry<>("", Lexer.TokType.List));
+                else {
+                    String last = tokens.get(tokens.size() - 1).getKey();
+                    String res = val.substring(0, val.indexOf(last) - 1).trim();
+                    node.setData(new AbstractMap.SimpleEntry<>(res, Lexer.TokType.List));
+                }
+            }
         } else {
-
         }
     }
 
